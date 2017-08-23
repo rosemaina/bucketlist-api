@@ -9,16 +9,15 @@ from flask_bcrypt import Bcrypt
 class User(db.Model):
     """This class represents the user table."""
 
-    __tablename__ = 'users'
+    __tablename__ = 'User'
 
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), nullable=False, unique=True)
     password = db.Column(db.String(80), nullable=False)
     bucketlists = db.relationship(
         'Bucketlist',
-        backref='user',
-        order_by='Bucketlist.id',
-        cascade="all, delete-orphan"
+        backref='users',
+        lazy='dynamic'
         )
 
     def __init__(self, email):
@@ -68,18 +67,18 @@ class Bucketlist(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(500))
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey(User.id))
     date_created = db.Column(db.DateTime, default=db.func.current_timestamp())
     date_modified = db.Column(
         db.DateTime, default=db.func.current_timestamp(),
         onupdate=db.func.current_timestamp())
-    items = db.relationship(
-        'Item',
-        backref='bucketlist',
-        order_by='Item.id',
-        cascade="all, delete-orphan",
-        lazy='dynamic'
-        )
+    # items = db.relationship(
+    #     'Item',
+    #     backref='bucketlists',
+    #     order_by='Item.id',
+    #     cascade="all, delete-orphan",
+    #     lazy='dynamic'
+    #     )
 
 
     def __init__(self, title, user_id):
@@ -116,7 +115,7 @@ class Bucketlist(db.Model):
 
 #     id = db.Column(db.Integer, primary_key=True)
 #     name = db.Column(db.String(255))
-#     bucketlist_id = db.Column(db.Integer, db.ForeignKey('bucketlist.id'))
+#     bucketlist_id = db.Column(db.Integer, db.ForeignKey('bucketlists.id'))
 #     # FOREIGN KEY (bucket_id)
 #     # REFERENCES Bucketlist(bucket_id)
 #     # ON DELETE CASCADE
