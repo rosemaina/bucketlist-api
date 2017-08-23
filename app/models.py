@@ -1,8 +1,12 @@
 # app/models.py
 """This is a representation of a table in a database"""
 
+import os
 import re
+import jwt
+import datetime
 from app import db
+from flask import jsonify
 from flask_bcrypt import Bcrypt
 
 
@@ -39,13 +43,20 @@ class User(db.Model):
         """Method confirms that password is correct"""
         return Bcrypt().check_password_hash(self.password, password)
 
+    def gen_token(self):
+        token = jwt.encode({
+            'id': self.id,
+            'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30)
+        }, os.getenv('SECRET'))
+        return jsonify({'token': token.decode('UTF-8')})
+
     def save(self):
         """Adds a new user to the database """
         db.session.add(self)
         db.session.commit()
 
     @staticmethod
-    def get_all():
+    def get_all(user_id):
         """Gets all users in a single query """
         return User.query.all()
 
