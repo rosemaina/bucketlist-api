@@ -1,6 +1,6 @@
 """This module contains all endpoints"""
 # Importing objects from flask
-from flask import request, jsonify
+from flask import request, jsonify, abort
 from flask_api import FlaskAPI
 from flask_sqlalchemy import SQLAlchemy
 # local import
@@ -87,42 +87,76 @@ def create_app(config_name):
         if request.method == "POST":
             title = str(request.data.get('title'))
             user_id = str(request.data.get('user_id'))
-
+            print(title, user_id)
             if title:
-                bucketlist = Bucketlist(title=title, user_id=user_id)
-                bucketlist.save()
+                new_bucket = Bucketlist(title=title, user_id=user_id)
+                new_bucket.save()
                 response = jsonify({
-                    'id': bucketlist.id,
-                    'title': bucketlist.title,
-                    'date_created': bucketlist.date_created,
-                    'date_modified': bucketlist.date_modified
+                    'id': new_bucket.id,
+                    'title': new_bucket.title,
+                    'date_created': new_bucket.date_created,
+                    'date_modified': new_bucket.date_modified
                 })
                 response.status_code = 201
+                print(response)
                 return response
-        else:
-            # GET
-            bucketlists = Bucketlist.get_all(user_id)
-            results = []
+    #     else:
+    #         # GET
+    #         bucketlists = Bucketlist.get_all()
+    #         results = []
 
-            for bucketlist in bucketlists:
-                obj = {
-                    'id': bucketlist.id,
-                    'title': bucketlist.title,
-                    'date_created': bucketlist.date_created,
-                    'date_modified': bucketlist.date_modified
-                }
-                results.append(obj)
-            response = jsonify(results)
-            response.status_code = 200
-            print(response)
-            return response
+    #         for bucketlist in bucketlists:
+    #             obj = {
+    #                 'id': bucketlist.id,
+    #                 'title': bucketlist.title,
+    #                 'date_created': bucketlist.date_created,
+    #                 'date_modified': bucketlist.date_modified
+    #             }
+    #             results.append(obj)
+    #         response = jsonify(results)
+    #         response.status_code = 200
+    #         print(response)
+    #         return response
 
 
-    # @app.route('/bucketlists/<id>', methods=['GET'])
+    # @app.route('/bucketlist<id>', methods=['GET', 'PUT', 'DELETE'])
+    # # /bucketlists/<int:id>'
+    # def bucketlist_manipulation(id, **kwargs):
+    #  # retrieve a buckelist using it's ID
+    #     bucketlist = Bucketlist.query.filter_by(id=id).first()
+    #     if not bucketlist:
+    #         # Raise an HTTPException with a 404 not found status code
+    #         abort(404)
 
-    # @app.route('/bucketlists/<id>', methods=['PUT'])
+    #         if request.method == 'DELETE':
+    #             bucketlist.delete()
+    #             return {
+    #                 "message": "bucketlist {} deleted successfully".format(bucketlist.id)
+    #                 }, 200
 
-    # @app.route('/bucketlists/<id>', methods=['DELETE'])
+    #     elif request.method == 'PUT':
+    #         name = str(request.data.get('name', ''))
+    #         bucketlist.name = name
+    #         bucketlist.save()
+    #         response = jsonify({
+    #             'id': bucketlist.id,
+    #             'name': bucketlist.name,
+    #             'date_created': bucketlist.date_created,
+    #             'date_modified': bucketlist.date_modified
+    #         })
+    #         response.status_code = 200
+    #         return response
+    #     else:
+    #         # GET
+    #         response = jsonify({
+    #             'id': bucketlist.id,
+    #             'name': bucketlist.name,
+    #             'date_created': bucketlist.date_created,
+    #             'date_modified': bucketlist.date_modified
+    #         })
+    #         response.status_code = 200
+    #         return response
+
 
     # # CRUD bucket items
     # @app.route('/bucketlists/<id>/items/', methods['POST'])
