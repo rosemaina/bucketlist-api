@@ -1,8 +1,11 @@
 """This module contains all endpoints"""
 # Importing objects from flask
+import os
+import jwt
 from flask import request, jsonify, abort
 from flask_api import FlaskAPI
 from flask_sqlalchemy import SQLAlchemy
+from functools import wraps
 # local import
 from instance.config import app_config
 
@@ -20,6 +23,38 @@ def create_app(config_name):
     db.init_app(app)
     from app.models import User
     from app.models import Bucketlist
+
+
+    def token_required(f):
+        """This valids token"""
+        # this takes in a function f
+        @wraps(f)
+        # define a function decorated
+        def decorated(*args, **kwargs):
+            token = None
+
+            # ckecking if auth is in header
+            if 'Authorization' in request.headers:
+                # reads the token value
+                token = request.headers['Authorization']
+
+            if not token:
+                # this returns an error when token is missing
+                return jsonify({'error': 'Token not found!'}), 401
+
+            try:
+                # tying to decode the token found
+                #and fetch the user by User.id
+                id = jwt.decode(token, os.getenv('SECRET'))['id']
+                current_user = User.query.filter_by(id=id).first()
+            except:
+                return jsonify({'message': 'Token expired!'}), 401
+
+            # returns the functions witht the user and its args
+            return f(current_user, *args, **kwargs)
+
+        return decorated
+
 
 
     @app.route('/auth/register', methods=['POST'])
@@ -67,11 +102,17 @@ def create_app(config_name):
         password = request.data['password']
         found_user = User.query.filter_by(email=email).first()
         if not found_user:
-            return 'User ' + email + ' not found'
-        if found_user.validate_password(password):
-            resp = jsonify({'message': 'You are logged in'})
-            resp.status_code = 200
+            resp = jsonify({'error': 'User {} not found'.format(email)})
+            resp.status_code = 401
             return resp
+
+        if not found_user.validate_password(password):
+            resp = jsonify({'error': 'Wrong password!'})
+            resp.status_code = 400
+            return resp
+        resp = found_user.gen_token()
+        resp.status_code = 200
+        return resp
 
     # @app.route('/auth/logout', methods=['POST'])
     # def logout():
@@ -83,11 +124,11 @@ def create_app(config_name):
 
     # # CRUD bucketlist
     @app.route('/bucketlist', methods=['POST', 'GET'])
-    def create_bucketlist():
+    @token_required
+    def create_bucketlist(current_user):
+        title = str(request.data.get('title'))
+        user_id = current_user.id
         if request.method == "POST":
-            title = str(request.data.get('title'))
-            user_id = str(request.data.get('user_id'))
-            print(title, user_id)
             if title:
                 new_bucket = Bucketlist(title=title, user_id=user_id)
                 new_bucket.save()
@@ -98,64 +139,85 @@ def create_app(config_name):
                     'date_modified': new_bucket.date_modified
                 })
                 response.status_code = 201
-                print(response)
                 return response
-    #     else:
-    #         # GET
-    #         bucketlists = Bucketlist.get_all()
-    #         results = []
+            return jsonify({'error': 'Title not given!'})
+        else:
+            # GETs all bucketlists
+            bucketlists = Bucketlist.query.filter_by(user_id=user_id).all()
+            if not bucketlists:
+                return jsonify({'error': 'No bucketlists found!'}), 403
 
-    #         for bucketlist in bucketlists:
-    #             obj = {
-    #                 'id': bucketlist.id,
-    #                 'title': bucketlist.title,
-    #                 'date_created': bucketlist.date_created,
-    #                 'date_modified': bucketlist.date_modified
-    #             }
-    #             results.append(obj)
-    #         response = jsonify(results)
-    #         response.status_code = 200
-    #         print(response)
-    #         return response
+            results = []
+            for bucketlist in bucketlists:
+                obj = {
+                    'id': bucketlist.id,
+                    'title': bucketlist.title,
+                    'date_created': bucketlist.date_created,
+                    'date_modified': bucketlist.date_modified
+                }
+                results.append(obj)
+            resp = jsonify(results)
+            resp.status_code = 200
+            return resp
 
+    @app.route('/bucketlist/<id>', methods=['GET'])
+    @token_required
+    def get_bucket(current_user, id):
+        """Retrieves a buckelist using it's ID"""
+        bucketlist = Bucketlist.query.filter_by(user_id=current_user.id, id=id).first()
+        if not bucketlist:
+            return jsonify({'error': 'Bucketlist NOT found'}), 401
+        else:
+            resp = {
+                'id': bucketlist.id,
+                'title': bucketlist.title,
+                'date_created': bucketlist.date_created,
+                'date_modified': bucketlist.date_modified
+            }
+            return jsonify(resp), 200
 
-    # @app.route('/bucketlist<id>', methods=['GET', 'PUT', 'DELETE'])
-    # # /bucketlists/<int:id>'
-    # def bucketlist_manipulation(id, **kwargs):
-    #  # retrieve a buckelist using it's ID
-    #     bucketlist = Bucketlist.query.filter_by(id=id).first()
-    #     if not bucketlist:
-    #         # Raise an HTTPException with a 404 not found status code
-    #         abort(404)
+    @app.route('/bucketlist/<id>', methods=['DELETE'])
+    @token_required
+    def delete_bucket(current_user, id):
+        """Deleting a specific bucketlist"""
+        # retrieve a buckelist using it's ID
+        title = str(request.data.get('title'))
+        bucketlist = Bucketlist.query.filter_by(user_id=current_user.id, id=id).first()
+        if not bucketlist:
+            return jsonify({'error': 'Bucketlist NOT found'}), 401
+        else:
+            bucketlist.delete()
+            return jsonify({'message': 'Bucketlist {} deleted'.format(title)})
 
-    #         if request.method == 'DELETE':
-    #             bucketlist.delete()
-    #             return {
-    #                 "message": "bucketlist {} deleted successfully".format(bucketlist.id)
-    #                 }, 200
-
-    #     elif request.method == 'PUT':
-    #         name = str(request.data.get('name', ''))
-    #         bucketlist.name = name
-    #         bucketlist.save()
-    #         response = jsonify({
-    #             'id': bucketlist.id,
-    #             'name': bucketlist.name,
-    #             'date_created': bucketlist.date_created,
-    #             'date_modified': bucketlist.date_modified
-    #         })
-    #         response.status_code = 200
-    #         return response
-    #     else:
-    #         # GET
-    #         response = jsonify({
-    #             'id': bucketlist.id,
-    #             'name': bucketlist.name,
-    #             'date_created': bucketlist.date_created,
-    #             'date_modified': bucketlist.date_modified
-    #         })
-    #         response.status_code = 200
-    #         return response
+    @app.route('/bucketlist/<id>', methods=['PUT'])
+    @token_required
+    def edit_bucket(current_user, id):
+        """Edits a bucketlist"""
+        if request.method == 'PUT':
+            title = str(request.data.get('title'))
+            bucketlist = Bucketlist.query.filter_by(user_id=current_user.id, id=id).first()
+            if not bucketlist:
+                return jsonify({'message': 'Bucketlist NOT found'})
+            else:
+                bucketlist.title = title
+                bucketlist.save()
+                resp = {
+                    'id': bucketlist.id,
+                    'title': bucketlist.title,
+                    'date_created': bucketlist.date_created,
+                    'date_modified': bucketlist.date_modified
+                }
+                return jsonify(resp), 200
+        else:
+            # GET
+            response = jsonify({
+                'id': bucketlist.id,
+                'title': bucketlist.title,
+                'date_created': bucketlist.date_created,
+                'date_modified': bucketlist.date_modified
+            })
+            response.status_code = 200
+            return response
 
 
     # # CRUD bucket items
