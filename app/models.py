@@ -83,13 +83,11 @@ class Bucketlist(db.Model):
     date_modified = db.Column(
         db.DateTime, default=db.func.current_timestamp(),
         onupdate=db.func.current_timestamp())
-    # items = db.relationship(
-    #     'Item',
-    #     backref='bucketlists',
-    #     order_by='Item.id',
-    #     cascade="all, delete-orphan",
-    #     lazy='dynamic'
-    #     )
+    items = db.relationship(
+        'Item',
+        backref='bucketlists',
+        lazy='dynamic'
+        )
 
 
     def __init__(self, title, user_id):
@@ -118,38 +116,36 @@ class Bucketlist(db.Model):
         return "<Bucketlist: {}>".format(self.title)
 
 
-# class Item(db.Model):
-#     """This class represents the bucketlist item table."""
+class Item(db.Model):
+    """This class represents the bucketlist item table."""
 
-#     #Should always be plural
-#     __tablename__ = 'items'
+    #Should always be plural
+    __tablename__ = 'items'
 
-#     id = db.Column(db.Integer, primary_key=True)
-#     name = db.Column(db.String(255))
-#     bucketlist_id = db.Column(db.Integer, db.ForeignKey('bucketlists.id'))
-#     # FOREIGN KEY (bucket_id)
-#     # REFERENCES Bucketlist(bucket_id)
-#     # ON DELETE CASCADE
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(500))
+    bucket_id = db.Column(db.Integer, db.ForeignKey('bucketlists.id'))
 
-#     def __init__(self, name):
-#         """initialization."""
-#         self.name = name
+    def __init__(self, name, bucket_id):
+        """initialization."""
+        self.name = name
+        self.bucket_id = bucket_id
 
-#     def save(self):
-#         """Adds a new bucketlist item to the database """
-#         db.session.add(self)
-#         db.session.commit()
+    def save(self):
+        """Adds a new bucketlist item to the database """
+        db.session.add(self)
+        db.session.commit()
 
-#     @staticmethod
-#     def get_all():
-#         """Gets all bucketlist items in a single query """
-#         return Item.query.all()
+    @staticmethod
+    def get_all(bucket_id):
+        """Gets all bucketlist items in a single query """
+        return Item.query.all(bucket_id=bucket_id)
 
-#     def delete(self):
-#         """Deletes an existing bucketlist item from the database """
-#         db.session.delete(self)
-#         db.session.commit()
+    def delete(self):
+        """Deletes an existing bucketlist item from the database """
+        db.session.delete(self)
+        db.session.commit()
 
-#     def __repr__(self):
-#         """Represents the object instance of the model whenever it queries"""
-#         return "<Item: {}>".format(self.name)
+    def __repr__(self):
+        """Represents the object instance of the model whenever it queries"""
+        return "<Item: {}>".format(self.name)

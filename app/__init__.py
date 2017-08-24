@@ -23,6 +23,7 @@ def create_app(config_name):
     db.init_app(app)
     from app.models import User
     from app.models import Bucketlist
+    from app.models import Item
 
 
     def token_required(f):
@@ -51,7 +52,7 @@ def create_app(config_name):
                 return jsonify({'message': 'Token expired!'}), 401
 
             # returns the functions witht the user and its args
-            return f(current_user, *args, **kwargs)
+            return f(current_user=current_user, *args, **kwargs)
 
         return decorated
 
@@ -181,11 +182,11 @@ def create_app(config_name):
     def delete_bucket(current_user, id):
         """Deleting a specific bucketlist"""
         # retrieve a buckelist using it's ID
-        title = str(request.data.get('title'))
         bucketlist = Bucketlist.query.filter_by(user_id=current_user.id, id=id).first()
         if not bucketlist:
             return jsonify({'error': 'Bucketlist NOT found'}), 401
         else:
+            title = bucketlist.title
             bucketlist.delete()
             return jsonify({'message': 'Bucketlist {} deleted'.format(title)})
 
@@ -210,21 +211,58 @@ def create_app(config_name):
                 return jsonify(resp), 200
         else:
             # GET
-            response = jsonify({
+            resp = jsonify({
                 'id': bucketlist.id,
                 'title': bucketlist.title,
                 'date_created': bucketlist.date_created,
                 'date_modified': bucketlist.date_modified
             })
-            response.status_code = 200
-            return response
+            resp.status_code = 200
+            return resp
 
 
-    # # CRUD bucket items
-    # @app.route('/bucketlists/<id>/items/', methods['POST'])
+    # CRUD BUCKET LIST ITEMS
+    @app.route('/bucketlist/<id>/item', methods=['POST'])
+    @token_required
+    def create_item(current_user, id):
+        """Method creates an item"""
+        name = request.data['name']
+        bucket_id = id
+        if request.method == "POST":
+            if name:
+                new_item = Item(name=name, bucket_id=bucket_id)
+                new_item.save()
+                response = jsonify({
+                    'id': new_item.id,
+                    'name': new_item.name,
+                })
+                response.status_code = 201
+                return response
+            return jsonify({'error': 'Item name not given!'})
+        # else:
+        #     # GETs all items in a list
+        #     items = Item.query.filter_by(bucket_id=id).all()
+        #     if not items:
+        #         return jsonify({'error': 'No bucket items found!'}), 403
+        #     print(items)
+
+        #     results = []
+        #     for item in items:
+        #         obj = {
+        #             'id': item.id,
+        #             'name': item.name
+        #         }
+        #         results.append(obj)
+        #     resp = jsonify(results)
+        #     resp.status_code = 200
+            # return resp 
+        
 
     # @app.route('/bucketlists/<id>/items/<item_id>', methods['PUT'])
+    # @token_required
 
     # @app.route('/bucketlists/<id>/items/<item_id>', methods=['DELETE'])
+    # @token_required
+
 
     return app
