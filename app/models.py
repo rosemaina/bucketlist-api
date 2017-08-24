@@ -46,7 +46,7 @@ class User(db.Model):
     def gen_token(self):
         token = jwt.encode({
             'id': self.id,
-            'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30)
+            'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=30)
         }, os.getenv('SECRET'))
         return jsonify({'token': token.decode('UTF-8')})
 
@@ -86,7 +86,8 @@ class Bucketlist(db.Model):
     items = db.relationship(
         'Item',
         backref='bucketlists',
-        lazy='dynamic'
+        lazy='dynamic',
+        cascade="all,delete",
         )
 
 
@@ -96,24 +97,24 @@ class Bucketlist(db.Model):
         self.user_id = user_id
 
 
-    def save(self):
-        """Adds a new bucketlist to the database """
-        db.session.add(self)
-        db.session.commit()
+    # def save(self):
+    #     """Adds a new bucketlist to the database """
+    #     db.session.add(self)
+    #     db.session.commit()
 
-    @staticmethod
-    def get_all(user_id):
-        """Gets all bucketlists in a single query """
-        return Bucketlist.query.all(user_id=user_id)
+    # @staticmethod
+    # def get_all(user_id):
+    #     """Gets all bucketlists in a single query """
+    #     return Bucketlist.query.all(user_id=user_id)
 
-    def delete(self):
-        """Deletes an existing bucketlist from the database """
-        db.session.delete(self)
-        db.session.commit()
+    # def delete(self):
+    #     """Deletes an existing bucketlist from the database """
+    #     db.session.delete(self)
+    #     db.session.commit()
 
-    def __repr__(self):
-        """Represents the object instance of the model whenever it queries"""
-        return "<Bucketlist: {}>".format(self.title)
+    # def __repr__(self):
+    #     """Represents the object instance of the model whenever it queries"""
+    #     return "<Bucketlist: {}>".format(self.title)
 
 
 class Item(db.Model):
@@ -121,7 +122,7 @@ class Item(db.Model):
 
     #Should always be plural
     __tablename__ = 'items'
-
+    __table_args__ = {'extend_existing': True}
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(500))
     bucket_id = db.Column(db.Integer, db.ForeignKey('bucketlists.id'))
