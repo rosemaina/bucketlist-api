@@ -1,3 +1,5 @@
+[![Coverage Status](https://coveralls.io/repos/github/rosemaina/bucketlist-api/badge.svg?branch=feature)](https://coveralls.io/github/rosemaina/bucketlist-api?branch=feature)
+
 # Bucketlist-api
 A bucketlist is a list of activites that one aspires to do before they kick the bucket.
 This is a python flask based RESTful API application that allows users to Create, Read, Update, Delete bucketlist and bucketlist items/ activities
