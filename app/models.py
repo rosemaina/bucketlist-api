@@ -5,6 +5,7 @@ import os
 import re
 import jwt
 import datetime
+
 from app import db
 from flask import jsonify
 from flask_bcrypt import Bcrypt
@@ -44,6 +45,7 @@ class User(db.Model):
         return Bcrypt().check_password_hash(self.password, password)
 
     def gen_token(self):
+        """Generates a token"""
         token = jwt.encode({
             'id': self.id,
             'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=30)
@@ -67,7 +69,7 @@ class User(db.Model):
 
     def __repr__(self):
         """Represents the object instance of the model whenever it queries"""
-        return "<User: {}>".format(self.email)
+        return "<User email: {}>".format(self.email)
 
 
 class Bucketlist(db.Model):
@@ -115,7 +117,6 @@ class Bucketlist(db.Model):
     def __repr__(self):
         """Represents the object instance of the model whenever it queries"""
         return "<Bucketlist: {}>".format(self.title)
-# 
 
 class Item(db.Model):
     """This class represents the bucketlist item table."""
