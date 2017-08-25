@@ -178,7 +178,7 @@ def create_app(config_name):
         else:
             # print(bucketlist.items)
             # bucketlist_items = Item.query.filter_by(bucket_id=id)
-            # query all bucketlist items with the bucket id 
+            # query all bucketlist items with the bucket id
             resp = {
                 'id': bucketlist.id,
                 'title': bucketlist.title,
@@ -271,15 +271,15 @@ def create_app(config_name):
         #     resp.status_code = 200
         #     return resp
         
-    @app.route('/bucketlist/<id>/item', methods=['DELETE'])
+    @app.route('/bucketlist/<id>/item/<item_id>', methods=['DELETE'])
     @token_required
-    def delete_bucketlist_item(current_user, id):
+    def delete_bucketlist_item(current_user, id, item_id):
         """"Deltes a bucketlist"""
-        item = Item.query.filter_by(bucket_id=id, id=id).first()
+        item = Item.query.filter_by(bucket_id=id, id=item_id).first()
         if not item:
             return jsonify({'error': 'Bucketlist item not found!'})
         else:
-            item.delete(item.name)
+            item.delete()
             return jsonify({'message': 'Bucketlist item deleted'})
 
     # @app.route('/bucketlists/<id>/items/<item_id>', methods=['DELETE'])

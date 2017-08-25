@@ -97,25 +97,25 @@ class Bucketlist(db.Model):
         self.user_id = user_id
 
 
-    # def save(self):
-    #     """Adds a new bucketlist to the database """
-    #     db.session.add(self)
-    #     db.session.commit()
+    def save(self):
+        """Adds a new bucketlist to the database """
+        db.session.add(self)
+        db.session.commit()
 
-    # @staticmethod
-    # def get_all(user_id):
-    #     """Gets all bucketlists in a single query """
-    #     return Bucketlist.query.all(user_id=user_id)
+    @staticmethod
+    def get_all(user_id):
+        """Gets all bucketlists in a single query """
+        return Bucketlist.query.all(user_id=user_id)
 
-    # def delete(self):
-    #     """Deletes an existing bucketlist from the database """
-    #     db.session.delete(self)
-    #     db.session.commit()
+    def delete(self):
+        """Deletes an existing bucketlist from the database """
+        db.session.delete(self)
+        db.session.commit()
 
-    # def __repr__(self):
-    #     """Represents the object instance of the model whenever it queries"""
-    #     return "<Bucketlist: {}>".format(self.title)
-
+    def __repr__(self):
+        """Represents the object instance of the model whenever it queries"""
+        return "<Bucketlist: {}>".format(self.title)
+# 
 
 class Item(db.Model):
     """This class represents the bucketlist item table."""
