@@ -7,11 +7,11 @@ This is a python flask based RESTful API application that allows users to Create
 
 #API Endpoints
 
-1. 'POST /auth/login` login a user
+1. `POST /auth/login` login a user
 
 2. `POST /auth/register` register a user
 
-3. `POST /bucketlist create a bucketlist
+3. `POST /bucketlist` create a bucketlist
 
 4. `GET /bucketlist` view all created bucketlists
 
