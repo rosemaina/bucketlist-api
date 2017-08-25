@@ -9,6 +9,21 @@ install:
   - pip install -r requirements.txt
   - pip install coveralls
 
+services:
+ -postgresql
+
+env:
+  global:
+    -export SECRET="some-very-long-string-of-random-characters-CHANGE-TO-YOUR-LIKING"
+    -export APP_SETTINGS="development"
+    -export DATABASE_URL="postgresql://localhost/flask_api"
+
+before_scripts:
+  -createdb flask_api
+  -python manage.py db init
+  -python manage.py db migrate
+  -python manage.py db upgrade
+
 # command to run the test
 script:
   - coverage run --omit="*/site-packages/*" manage.py test
