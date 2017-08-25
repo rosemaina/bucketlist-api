@@ -38,7 +38,7 @@ Installation
 Download the project locally by running : git clone https://github.com/rosemaina/bucketlist-api.git  
 . `cd bucketlist-api` 
 
-. create a virtualenv file. bucketenv
+. create a virtualenv file `virtualenv -p python3 bucketenv`
 
 . create a .env file and add the following exports:
 
