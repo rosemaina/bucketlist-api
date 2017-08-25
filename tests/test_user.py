@@ -29,7 +29,7 @@ class UserTestCase(unittest.TestCase):
         """Test API can't register a user twice"""
         user_data = {'email': 'johndoe.email@com', 'password': '12345678'}
         resp = self.client().post('/auth/register', data=user_data)
-        self.assertEqual(resp.status_code, 409)
+        self.assertEqual(resp.status_code, 403)
 
     def test_email_validation(self):
         """Test correct email format"""
