@@ -2,41 +2,42 @@
 [![Build Status](https://travis-ci.org/rosemaina/bucketlist-api.svg?branch=master)](https://travis-ci.org/rosemaina/bucketlist-api)
 
 # Bucketlist-api
-A bucketlist is a list of activites that one aspires to do before they kick the bucket.
-This is a python flask based RESTful API application that allows users to Create, Read, Update, Delete bucketlist and bucketlist items/ activities
+What's on your bucket list? Adventure travel, volunteerism, crazy fun, connecting with nature? 1000+ awesome ideas of things to do before you reach a certain age, year... etc
+This is a Python-Flask based RESTful API application that allows users to log and catalog all the stuff they want to accomplish before they expire
 
-#API Endpoints
+# API Documentation
+. Link : 
 
-1. `POST /auth/login` login a user
+## API-ENDPOINTS
+URL Endpoint    |               HTTP Request   | Resource Accessed | Access Type|
+----------------|-----------------|-------------|------------------
+/bucketlist/auth/register   |      POST    | Register a new user |public
+/bucketlist/auth/login      |     POST    | Login a registered user |public
+/bucketlist/auth/logout      |     POST    | Logout a user |public
+/bucketlist/auth/reset-password      |     PUT    | Reset password for a user |private
+/bucketlist                  |      POST    | Create a new Bucketlist |private
+/bucketlist                  |      GET    |     Retrieve all bucketlists for one user |private
+/bucketlist/<id>            |      GET        | Retrieve a specific bucketlist |private
+/bucketlist/<id>              |      PUT    |     Update a bucketlist |private
+/bucketlist/<id>              |      DELETE    | Delete a bucketlist |private
+/bucketlist/<id>/item/  |           GET    | Retrieve items for a specific bucketlist |private
+/bucketlist/<id>/item/     |     POST    | Create items in a bucketlist |private
+/bucketlist/<id>/item/<item_id>|    DELETE    | Delete an item in a bucketlist |prvate
+/bucketlist/<id>/item/<item_id>|    PUT       | Update a bucketlist item |private
 
-2. `POST /auth/register` register a user
 
-3. `POST /bucketlist` create a bucketlist
+Prerequisites:
 
-4. `GET /bucketlist` view all created bucketlists
-
-5. `GET /bucketlist/<id>` view a specific bucketlist
-
-6. `PUT /bucketlist/<id>` update a specific bucketlist
-
-7. `DELETE /bucketlist/<id>` delete a specific bucketlist
-
-8. `POST /bucketlist/<id>/items` create a bucketlist item
-
-9. `PUT /bucketlist/<id>/items/<item_id>` update a specific bucketlist item
-
-10. `DELETE /bucketlist/<id>/items/<item_id>` delete a specific bucketlist item  
-
-Requirements
-
-python 3.4, 3.6  
+Postgres  
+Flask  
+python 3.4,3.5, 3.6  
 virtualenv  
 autoenv  
 
 Installation  
 
 Download the project locally by running : git clone https://github.com/rosemaina/bucketlist-api.git  
-. `cd bucketlist-api` 
+. directory `cd bucketlist-api` 
 
 . create a virtualenv file `virtualenv -p python3 bucketenv`
 
@@ -50,6 +51,15 @@ Download the project locally by running : git clone https://github.com/rosemaina
 
 . save the file
 
+. activate environment variables `source .env`
+
+. Create a database  `createdb flask_api;`
+
+. To do migrations;
+. `python manage.py db init`
+. `python manage.py db migrate`
+. `python manage.py db upgrade`
+
 . Install the requirements in the requirements.txt file. Run `pip install -r requirements.txt`
 
 . Run the application. `python manage.py runserver`
@@ -57,6 +67,10 @@ Download the project locally by running : git clone https://github.com/rosemaina
 Testing  
 
 To run tests against the project run: `coverage run --omit="*/site-packages/*" manage.py test`
+
+# Deployment
+. Link : 
+To deploy your a copy of your application to heroku. Run `heroku create <your_url_name>`
 
 #Contributors
 
@@ -66,18 +80,3 @@ Rose Maina
 Andela - Inspiring the idea
 
 
-URL Endpoint    |               HTTP Request   | Resource Accessed | Access Type|
-----------------|-----------------|-------------|------------------
-/api/bucketlists/auth/register   |      POST    | Register a new user|publc
-/api/bucketlists/auth/login      |     POST    | Login and retrieve token|public
-/api/bucketlists/auth/logout      |     POST    | Logout and thus deactivate token|public
-/api/bucketlists/auth/reset-password      |     PUT    | Reset your password when logged in|private
-/api/bucketlists                  |      POST    |Create a new Bucketlist|private
-/api/bucketlists                  |      GET    |     Retrieve all bucketlists for user|private
-/api/bucketlists/<buckelist_id>            |      GET        | Retrieve a bucketlist by ID | private
-/api/bucketlists/<bucketlist_id>              |      PUT    |     Update a bucketlist |private
-/api/bucketlists/<bucketlist_id>              |      DELETE    | Delete a bucketlist |private
-/api/bucketlists/<bucketlist_id>/items/  |           GET    |Retrive items in a given bucket list|private
-/api/bucketlists/<bucketlist_id>/items/     |     POST    | Create items in a bucketlist |private
-/api/bucketlists/<bucketlist_id>/items/<item_id>|    DELETE    | Delete an item in a bucketlist |prvate
-/api/bucketlists/<bucketlist_id>/items/<item_id>|    PUT       |update a bucketlist item details |private
