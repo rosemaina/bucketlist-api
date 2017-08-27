@@ -26,7 +26,7 @@ URL Endpoint    |               HTTP Request   | Resource Accessed | Access Type
 /bucketlist/<id>/item/<item_id>|    PUT       | Update a bucketlist item |private
 
 
-Prerequisites:
+### Prerequisites:
 
 Postgres  
 Flask  
@@ -64,7 +64,7 @@ Download the project locally by running : git clone https://github.com/rosemaina
 
 . Run the application. `python manage.py runserver`
 
-Testing  
+#### Testing  
 
 To run tests against the project run: `coverage run --omit="*/site-packages/*" manage.py test`
 
