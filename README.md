@@ -26,7 +26,7 @@ URL Endpoint    |               HTTP Request   | Resource Accessed | Access Type
 /bucketlist/<id>/item/<item_id>|    PUT       | Update a bucketlist item |private
 
 
-### Prerequisites:
+#### Prerequisites:
 
 Postgres  
 Flask  
@@ -34,7 +34,7 @@ python 3.4,3.5, 3.6
 virtualenv  
 autoenv  
 
-### Installation  
+#### Installation  
 
 Download the project locally by running : git clone https://github.com/rosemaina/bucketlist-api.git  
 . directory `cd bucketlist-api` 
@@ -55,10 +55,10 @@ Download the project locally by running : git clone https://github.com/rosemaina
 
 . Create a database  `createdb flask_api;`
 
-. To do migrations;
-. `python manage.py db init`
-. `python manage.py db migrate`
-. `python manage.py db upgrade`
+. To do migrations;  
+. `python manage.py db init`  
+. `python manage.py db migrate`  
+. `python manage.py db upgrade`  
 
 . Install the requirements in the requirements.txt file. Run `pip install -r requirements.txt`
 
