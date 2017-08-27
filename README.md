@@ -34,7 +34,7 @@ python 3.4,3.5, 3.6
 virtualenv  
 autoenv  
 
-Installation  
+### Installation  
 
 Download the project locally by running : git clone https://github.com/rosemaina/bucketlist-api.git  
 . directory `cd bucketlist-api` 
