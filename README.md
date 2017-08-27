@@ -5,7 +5,7 @@
 What's on your bucket list? Adventure travel, volunteerism, crazy fun, connecting with nature? 1000+ awesome ideas of things to do before you reach a certain age, year... etc
 This is a Python-Flask based RESTful API application that allows users to log and catalog all the stuff they want to accomplish before they expire
 
-# API Documentation
+### API Documentation
 . Link : 
 
 ## API-ENDPOINTS
@@ -68,15 +68,17 @@ Testing
 
 To run tests against the project run: `coverage run --omit="*/site-packages/*" manage.py test`
 
-# Deployment
-. Link : 
+### Deployment
+
+Link :  
 To deploy your a copy of your application to heroku. Run `heroku create <your_url_name>`
 
-#Contributors
+### Contributors
 
 Rose Maina
 
-#Acknowledgements
+### Acknowledgements
+
 Andela - Inspiring the idea
 
 
