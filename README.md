@@ -70,7 +70,7 @@ To run tests against the project run: `coverage run --omit="*/site-packages/*" m
 
 ### Deployment
 
-Link :  
+Link : https://bucketlist-api1.herokuapp.com/  
 To deploy your a copy of your application to heroku. Run `heroku create <your_url_name>`
 
 ### Contributors
