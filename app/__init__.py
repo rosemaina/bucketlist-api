@@ -5,6 +5,7 @@ import jwt
 
 from flask import request, jsonify, abort
 from flask_api import FlaskAPI
+from flasgger import Swagger
 from flask_sqlalchemy import SQLAlchemy
 from functools import wraps
 # local import
@@ -24,43 +25,74 @@ def create_app(config_name):
     # Connects to the db
     db.init_app(app)
 
+    swagger = Swagger(app)
+
     from app.models import User
     from app.models import Bucketlist
     from app.models import Item
 
     def token_required(f):
         """This valids token"""
-        # this takes in a function f
+        # This takes in a function f
         @wraps(f)
-        # define a function decorated
         def decorated(*args, **kwargs):
             token = None
 
-            # ckecking if auth is in header
+            # Checks if auth is in the header
             if 'Authorization' in request.headers:
-                # reads the token value
+                # Reads token value
                 token = request.headers['Authorization']
 
             if not token:
-                # this returns an error when token is missing
-                return jsonify({'error': 'Token not found!'}), 401
+                # Returns an error if token is missing
+                return jsonify({'error': 'Invalid token. Please register or login'}), 401
 
             try:
-                # tying to decode the token found
-                # and fetch the user by User.id
+                # Trying to decode the token found using the secret key
                 id = jwt.decode(token, os.getenv('SECRET'))['id']
                 current_user = User.query.filter_by(id=id).first()
             except:
-                return jsonify({'message': 'Token expired!'}), 401
+                return jsonify({'message': 'Expired token! Please login'}), 401
 
-            # returns the functions witht the user and its args
+            # Returns the function with the user accessing the token
             return f(current_user=current_user, *args, **kwargs)
 
         return decorated
 
     @app.route('/auth/register', methods=['POST'])
     def user_registration():
-        """Method used to register a user"""
+        """ Register a new user 
+            ---
+            tags:
+            - "auth"
+            parameters:
+            - in: "body"
+                name: "data"
+                description: "Email and password submitted"
+                required: true
+                schema:
+                type: "object"
+                required:
+                - "email"
+                - "password"
+                properties:
+                    email:
+                    type: "string"
+                    password:
+                    type: "string"
+            responses:
+                409:
+                description: "Email address already exists!"
+                201:
+                description: "Success"
+                403:
+                description: "Invalid email address!"
+                411:
+                description: "Password length is too short!"
+                500:
+                desription: "An error occured!"
+
+        """
         email = request.data['email']
         password = request.data['password']
         try:
@@ -70,29 +102,25 @@ def create_app(config_name):
                 resp.status_code = 409
                 return resp
             if email and password:
-                if password.strip(" "):
-                    if len(password) >= 8:
-                        striped_password = password.strip(" ")
-                        if User.validate_email(email):
-                            new_user = User(email)
-                            new_user.create_password(striped_password)
-                            new_user.save()
-                            resp = jsonify(
-                                {'message': 'Successful registration!'})
-                            resp.status_code = 201
-                            return resp
-                        else:
-                            resp = jsonify(
-                                {'message': 'Invalid email address!'})
-                            resp.status_code = 403
-                            return resp
+                if len(password.strip(" ")) >= 8:
+                    striped_password = password.strip(" ")
+                    if User.validate_email(email):
+                        new_user = User(email)
+                        new_user.create_password(striped_password)
+                        new_user.save()
+                        resp = jsonify(
+                            {'message': 'Successful registration!'})
+                        resp.status_code = 201
+                        return resp
                     else:
-                        # takes the dic and turns it to a
-                        # json and adds status code
-                        return jsonify(
-                            {'message': 'Password length is too short!'}), 411
+                        resp = jsonify(
+                            {'message': 'Invalid email address!'})
+                        resp.status_code = 403
+                        return resp
                 else:
-                    return jsonify({'error': 'Spaces not allowed'}), 403
+                    # Takes the text and turns it into a json
+                    return jsonify(
+                        {'message': 'Password length is too short!'}), 411
             else:
                 return jsonify({'message': 'Email and password required!'}), 400
         except:
@@ -106,13 +134,13 @@ def create_app(config_name):
         password = request.data['password']
         found_user = User.query.filter_by(email=email).first()
         if not found_user:
-            resp = jsonify({'error': 'User {} not found'.format(email)})
+            resp = jsonify ({'error': 'User not found'})
             resp.status_code = 401
             return resp
 
         if not found_user.validate_password(password):
             resp = jsonify({'error': 'Wrong password!'})
-            resp.status_code = 400
+            resp.status_code = 401
             return resp
         resp = found_user.gen_token()
         resp.status_code = 200
@@ -123,7 +151,17 @@ def create_app(config_name):
     #     email = request.data['email']
     #     password = request.data['password']
 
-    # @app.route('/auth/reset-password', methods=['POST'])
+    @app.route('/auth/reset-password', methods=['POST'])
+    def reset_password():
+        email = request.data['email']
+        new_password = request.data['password']
+        found_user = User.query.filter_by(email=email).first()
+
+        if found_user:
+            found_user.create_password(new_password)
+            found_user.save()
+            return jsonify({'message': 'Password has changed successfully'}), 200
+        return jsonify({'error': 'User not found!'}), 403
 
     # CRUD BU
     @app.route('/bucketlist', methods=['POST', 'GET'])
@@ -142,16 +180,16 @@ def create_app(config_name):
                     new_bucket = Bucketlist(
                         title=striped_title, user_id=user_id)
                     new_bucket.save()
-                    response = jsonify({
+                    resp = jsonify({
                         'id': new_bucket.id,
                         'title': new_bucket.title,
                         'date_created': new_bucket.date_created,
                         'date_modified': new_bucket.date_modified
                     })
-                    response.status_code = 201
-                    return response
+                    resp.status_code = 201
+                    return resp
                 return jsonify({'error': 'Title already taken!'}), 403
-            return jsonify({'error': 'Title is blank'})
+            return jsonify({'error': 'Blank title. Please write your title'}), 401
         else:
             # GETs all bucketlists
             bucketlists = Bucketlist.query.filter_by(user_id=user_id).all()
@@ -178,7 +216,7 @@ def create_app(config_name):
         bucketlist = Bucketlist.query.filter_by(
             user_id=current_user.id, id=id).first()
         if not bucketlist:
-            return jsonify({'error': 'Bucketlist NOT found'}), 401
+            return jsonify({'error': 'Bucketlist Not found'}), 403
         else:
             # print(bucketlist.items)
             # bucketlist_items = Item.query.filter_by(bucket_id=id)
@@ -200,11 +238,11 @@ def create_app(config_name):
         bucketlist = Bucketlist.query.filter_by(
             user_id=current_user.id, id=id).first()
         if not bucketlist:
-            return jsonify({'error': 'Bucketlist NOT found'}), 401
+            return jsonify({'error': 'Bucketlist Not found'}), 403
         else:
             title = bucketlist.title
             bucketlist.delete()
-            return jsonify({'message': 'Bucketlist {} deleted'.format(title)})
+            return jsonify({'message': 'Bucketlist {} deleted'.format(title)}), 200
 
     @app.route('/bucketlist/<id>', methods=['PUT'])
     @token_required
@@ -214,7 +252,7 @@ def create_app(config_name):
         bucketlist = Bucketlist.query.filter_by(
             user_id=current_user.id, id=id).first()
         if not bucketlist:
-            return jsonify({'message': 'Bucketlist NOT found'})
+            return jsonify({'message': 'Bucketlist NOT found'}), 403
         else:
             bucketlist.title = title
             bucketlist.save()
@@ -251,7 +289,7 @@ def create_app(config_name):
                         resp.status_code = 201
                         return resp
                     return jsonify({'error': 'Name already exists'}), 403
-                return jsonify({'error': 'Item name not given!'})
+                return jsonify({'error': 'Item name not given!'}), 401
         return jsonify({'error':'Bucketlist does not exist!'}), 403
         # else:
         #     # GETs all items in a list
@@ -290,7 +328,7 @@ def create_app(config_name):
             name = str(request.data.get('name'))
             item = Item.query.filter_by(id=item_id, bucket_id=id).first()
             if not item:
-                return jsonify({'message': 'Bucketlist item NOT found'})
+                return jsonify({'message': 'Bucketlist item Not found'}), 403
             else:
                 item.name = name
                 item.save()
