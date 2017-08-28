@@ -5,7 +5,7 @@ import jwt
 
 from flask import request, jsonify, abort
 from flask_api import FlaskAPI
-# from flasgger import Swagger
+from flasgger import Swagger
 from flask_sqlalchemy import SQLAlchemy
 from functools import wraps
 # local import
@@ -25,7 +25,7 @@ def create_app(config_name):
     # Connects to the db
     db.init_app(app)
 
-    # swagger = Swagger(app)
+    swagger = Swagger(app)
 
     from app.models import User
     from app.models import Bucketlist
