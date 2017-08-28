@@ -1,0 +1,24 @@
+language: python
+python:
+  - "3.6"
+
+# command to install dependencies
+install:
+  - pip install -r requirements.txt
+  - pip install coveralls
+  - pip install nose
+
+services:
+ -postgresql
+ 
+before_script:
+  - psql -c "CREATE DATABASE test_db;" -U postgres
+env:
+  global:
+    - SECRET=secretword
+# command to run the test
+script:
+  - nosetests tests/
+  - nosetests  --with-coverage --cover-package=app
+  
+after_success: coveralls

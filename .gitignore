@@ -55,7 +55,6 @@ coverage.xml
 local_settings.py
 
 # Flask stuff:
-instance/
 .webassets-cache
 
 # Scrapy stuff:
@@ -84,7 +83,7 @@ celerybeat-schedule
 
 # virtualenv
 .venv
-venv/
+bucketenv/
 ENV/
 
 # Spyder project settings
@@ -99,3 +98,9 @@ ENV/
 
 # mypy
 .mypy_cache/
+
+migrations/
+.vscode/
+
+.coveralls.yml
+
