@@ -1,8 +1,6 @@
 language: python
 python:
-  - "2.7"
-  - "3.4"
-  - "3.6"
+  - "3.3"
 
 # command to install dependencies
 install:
@@ -12,21 +10,13 @@ install:
 
 services:
  -postgresql
-
-env:
-  global:
-    -export SECRET="some-very-long-string-of-random-characters-CHANGE-TO-YOUR-LIKING"
-    -export APP_SETTINGS="development"
-    -export DATABASE_URL="postgresql://localhost/flask_api"
-
-before_scripts:
-  -createdb flask_api
-  -python manage.py db init
-  -python manage.py db migrate
-  -python manage.py db upgrade
+ 
+ before_script:
+  - psql -c "CREATE DATABASE test_db;" -U postgres
 
 # command to run the test
 script:
-  - nosetests  --with-coverage
-after_success:
-  COVERALLS_REPO_TOKEN=$token  coveralls
+  - source .env
+  -  nosetests  --with-coverage
+  
+after_success: coveralls
