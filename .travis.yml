@@ -1,6 +1,6 @@
 language: python
 python:
-  - "3.3"
+  - "3.6"
 
 # command to install dependencies
 install:
@@ -11,12 +11,14 @@ install:
 services:
  -postgresql
  
- before_script:
+before_script:
   - psql -c "CREATE DATABASE test_db;" -U postgres
-
+env:
+  global:
+    - SECRET=secretword
 # command to run the test
 script:
-  - source .env
-  -  nosetests  --with-coverage
+  - nosetests tests/
+  - nosetests  --with-coverage --cover-package=app
   
 after_success: coveralls
