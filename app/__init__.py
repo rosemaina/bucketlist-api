@@ -5,7 +5,6 @@ import jwt
 
 from flask import request, jsonify, abort
 from flask_api import FlaskAPI
-from flasgger import Swagger
 from flask_sqlalchemy import SQLAlchemy
 from functools import wraps
 # local import
@@ -24,8 +23,6 @@ def create_app(config_name):
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     # Connects to the db
     db.init_app(app)
-
-    swagger = Swagger(app)
 
     from app.models import User
     from app.models import Bucketlist
@@ -46,7 +43,6 @@ def create_app(config_name):
             if not token:
                 # Returns an error if token is missing
                 return jsonify({'error': 'Invalid token. Please register or login'}), 401
-
             try:
                 # Trying to decode the token found using the secret key
                 id = jwt.decode(token, os.getenv('SECRET'))['id']
@@ -61,38 +57,7 @@ def create_app(config_name):
 
     @app.route('/auth/register', methods=['POST'])
     def user_registration():
-        """ Register a new user 
-            ---
-            tags:
-            - "auth"
-            parameters:
-            - in: "body"
-                name: "data"
-                description: "Email and password submitted"
-                required: true
-                schema:
-                type: "object"
-                required:
-                - "email"
-                - "password"
-                properties:
-                    email:
-                    type: "string"
-                    password:
-                    type: "string"
-            responses:
-                409:
-                description: "Email address already exists!"
-                201:
-                description: "Success"
-                403:
-                description: "Invalid email address!"
-                411:
-                description: "Password length is too short!"
-                500:
-                desription: "An error occured!"
-
-        """
+        """Method registers a user"""
         email = request.data['email']
         password = request.data['password']
         try:
@@ -146,12 +111,12 @@ def create_app(config_name):
         resp.status_code = 200
         return resp
 
-    # @app.route('/auth/logout', methods=['POST'])
-    # def logout():
-    #     email = request.data['email']
-    #     password = request.data['password']
+    @app.route('/auth/logout', methods=['POST'])
+    def logout():
+        """Method logs out user"""
+        pass
 
-    @app.route('/auth/reset-password', methods=['POST'])
+    @app.route('/auth/reset_password', methods=['POST'])
     def reset_password():
         email = request.data['email']
         new_password = request.data['password']
@@ -192,22 +157,51 @@ def create_app(config_name):
             return jsonify({'error': 'Blank title. Please write your title'}), 401
         else:
             # GETs all bucketlists
-            bucketlists = Bucketlist.query.filter_by(user_id=user_id).all()
-            if not bucketlists:
-                return jsonify({'error': 'No bucketlists found!'}), 403
+            url_endpoint = '/bucketlist'
+            search = request.args.get('q')
+            page = int(request.args.get('page', default=1))
+            # The page content limit should be 10
+            try:
+                limit = int(request.args.get('limit', default=10))
+            except ValueError:
+                return jsonify({'error': 'Error, pass a number'}), 406
+    
+            # Searches a bucketlist using q 
+            if search:
+                found_bucket = Bucketlist.query.filter_by(user_id=user_id).filter(
+                    Bucketlist.title.like('%'+search+'%')).paginate(page, limit, False)
+            else:
+                found_bucket = Bucketlist.query.filter_by(user_id=user_id).paginate(
+                    page, limit, False)
+            if not found_bucket.items:
+                return jsonify({'error': 'Bucketlists not found'}), 404
 
-            results = []
-            for bucketlist in bucketlists:
+
+            bucket_dict = {"bucketlist": []}
+            next_page = found_bucket.has_next if found_bucket.has_next else ''
+            prev_page = found_bucket.has_prev if found_bucket.has_prev else ''
+            # Base URl, concancate the pages,update page, give it a limit
+            if next_page:
+                next_page = url_endpoint + '?page=' + str(page + 1) + '&limit=' + str(limit)
+            else:
+                next_page = ''
+
+            if prev_page:
+                prev_page = url_endpoint + '?page=' + str(page - 1) + '&limit=' + str(limit)
+            else:
+                prev_page = ''
+
+            for bucket in found_bucket.items:
                 obj = {
-                    'id': bucketlist.id,
-                    'title': bucketlist.title,
-                    'date_created': bucketlist.date_created,
-                    'date_modified': bucketlist.date_modified
+                    'id': bucket.id,
+                    'title': bucket.title,
+                    'date_created': bucket.date_created,
+                    'date_modified': bucket.date_modified
                 }
-                results.append(obj)
-            resp = jsonify(results)
-            resp.status_code = 200
-            return resp
+                bucket_dict["bucketlist"].append(obj)
+            bucket_dict['next_page'] = next_page
+            bucket_dict['prev_page'] = prev_page
+            return jsonify(bucket_dict), 200
 
     @app.route('/bucketlist/<id>', methods=['GET'])
     @token_required
@@ -218,15 +212,11 @@ def create_app(config_name):
         if not bucketlist:
             return jsonify({'error': 'Bucketlist Not found'}), 403
         else:
-            # print(bucketlist.items)
-            # bucketlist_items = Item.query.filter_by(bucket_id=id)
-            # query all bucketlist items with the bucket id
             resp = {
                 'id': bucketlist.id,
                 'title': bucketlist.title,
                 'date_created': bucketlist.date_created,
                 'date_modified': bucketlist.date_modified,
-                # 'items': { items }
             }
             return jsonify(resp), 200
 
@@ -314,7 +304,7 @@ def create_app(config_name):
         """"Deltes a bucketlist"""
         item = Item.query.filter_by(bucket_id=id, id=item_id).first()
         if not item:
-            return jsonify({'error': 'Bucketlist item not found!'})
+            return jsonify({'error': 'Bucketlist item not found!'}), 403
         else:
             item.delete()
             return jsonify({'message': 'Bucketlist item deleted'})
