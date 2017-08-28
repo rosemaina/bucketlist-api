@@ -89,9 +89,7 @@ def create_app(config_name):
             else:
                 return jsonify({'message': 'Email and password required!'}), 400
         except:
-            resp = jsonify({'error': 'An error occured!'})
-            resp.status_code = 500
-            return resp
+            return jsonify({'error': 'An error occured!'}), 500
 
     @app.route('/auth/login', methods=['POST'])
     def user_login():
