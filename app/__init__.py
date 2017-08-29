@@ -61,38 +61,7 @@ def create_app(config_name):
 
     @app.route('/auth/register', methods=['POST'])
     def user_registration():
-        """ Register a new user 
-            ---
-            tags:
-            - "auth"
-            parameters:
-            - in: "body"
-                name: "data"
-                description: "Email and password submitted"
-                required: true
-                schema:
-                type: "object"
-                required:
-                - "email"
-                - "password"
-                properties:
-                    email:
-                    type: "string"
-                    password:
-                    type: "string"
-            responses:
-                409:
-                description: "Email address already exists!"
-                201:
-                description: "Success"
-                403:
-                description: "Invalid email address!"
-                411:
-                description: "Password length is too short!"
-                500:
-                desription: "An error occured!"
-
-        """
+        """Register a new user"""
         email = request.data['email']
         password = request.data['password']
         try:
