@@ -30,7 +30,7 @@ def create_app(config_name):
 
     @app.route('/')
     def index():
-        """This method returns a home page"""
+        """This method returns a Home Page"""
         return render_template("index.html")
 
     def token_required(f):
