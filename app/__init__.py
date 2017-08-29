@@ -131,6 +131,17 @@ def create_app(config_name):
             return jsonify({'message': 'Password has changed successfully'}), 200
         return jsonify({'error': 'User not found!'}), 403
 
+    @app.route('/auth/delete', methods=['POST'])
+    def delete_user():
+        email = str(request.data.get('email'))
+        found_user = User.query.filter_by(email=email).first()
+        if not found_user:
+            return jsonify({'error': 'User not found'}), 404
+        else:
+            email = found_user.email
+            found_user.delete()
+            return jsonify({'message': 'User {} deleted'.format(email)}), 200
+
     # CRUD BU
     @app.route('/bucketlist', methods=['POST', 'GET'])
     @token_required
