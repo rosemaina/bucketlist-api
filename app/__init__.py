@@ -3,7 +3,7 @@
 import os
 import jwt
 
-from flask import request, jsonify, abort
+from flask import request, jsonify, render_template
 from flask_api import FlaskAPI
 from flask_sqlalchemy import SQLAlchemy
 from functools import wraps
@@ -27,6 +27,11 @@ def create_app(config_name):
     from app.models import User
     from app.models import Bucketlist
     from app.models import Item
+
+    @app.route('/')
+    def index():
+        """This method returns a Home Page"""
+        return render_template("index.html")
 
     def token_required(f):
         """This valids token"""
