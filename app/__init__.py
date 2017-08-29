@@ -29,10 +29,10 @@ def create_app(config_name):
     from app.models import Bucketlist
     from app.models import Item
 
-    '''@app.route('/')
+    @app.route('/')
     def index():
         """This method returns a Home Page"""
-        return render_template("index.html")'''
+        return render_template("index.html")
 
     def token_required(f):
         """This valids token"""
