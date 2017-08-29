@@ -53,8 +53,8 @@ class BucketlistTestCase(unittest.TestCase):
     def test_get_all_bucketlist_when_blank(self):
         """Tests if a bucketlist exists"""
         resp = self.client().get('/bucketlist', headers=self.login())
-        self.assertEqual(resp.status_code, 403)
-        self.assertIn('No bucketlists found!', str(resp.data))
+        self.assertEqual(resp.status_code, 404)
+        self.assertIn('Bucketlists not found', str(resp.data))
 
     def test_api_can_get_bucketlist_by_id(self):
         """Test API can get a bucketlist using it's id"""

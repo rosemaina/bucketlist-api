@@ -79,15 +79,15 @@ class UserTestCase(unittest.TestCase):
         self.assertEqual(resp.status_code, 401)
         self.assertIn('User not found', str(resp.data))
 
-    def test_logout(self):
-        """Test API can logout a user"""
-        resp = self.client().post('/auth/logout', data=self.user)
+    # def test_logout(self):
+    #     """Test API can logout a user"""
+    #     resp = self.client().post('/auth/logout', data=self.user)
 
     def test_reset_password(self):
         """Test API can reset password for a user"""
         self.registration()
         self.user['password'] = 'test2'
-        resp = self.client().post('/auth/reset-password', data=self.user)
+        resp = self.client().post('/auth/reset_password', data=self.user)
         self.assertEqual(resp.status_code, 200)
         self.assertIn('Password has changed successfully', str(resp.data))
 
