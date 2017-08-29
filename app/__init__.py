@@ -28,10 +28,10 @@ def create_app(config_name):
     from app.models import Bucketlist
     from app.models import Item
 
-    @app.route('/')
+    '''@app.route('/')
     def index():
         """This method returns a Home Page"""
-        return render_template("index.html")
+        return render_template("index.html")'''
 
     def token_required(f):
         """This valids token"""
@@ -60,7 +60,7 @@ def create_app(config_name):
 
         return decorated
 
-    @app.route('/auth/register', methods=['POST'])
+    @app.route('/auth/register/', methods=['POST'])
     def user_registration():
         """Method registers a user"""
         email = request.data['email']
@@ -96,7 +96,7 @@ def create_app(config_name):
         except:
             return jsonify({'error': 'An error occured!'}), 500
 
-    @app.route('/auth/login', methods=['POST'])
+    @app.route('/auth/login/', methods=['POST'])
     def user_login():
         email = request.data['email']
         password = request.data['password']
@@ -114,12 +114,12 @@ def create_app(config_name):
         resp.status_code = 200
         return resp
 
-    @app.route('/auth/logout', methods=['POST'])
+    @app.route('/auth/logout/', methods=['POST'])
     def logout():
         """Method logs out user"""
         pass
 
-    @app.route('/auth/reset_password', methods=['POST'])
+    @app.route('/auth/reset_password/', methods=['POST'])
     def reset_password():
         email = request.data['email']
         new_password = request.data['password']
@@ -131,7 +131,7 @@ def create_app(config_name):
             return jsonify({'message': 'Password has changed successfully'}), 200
         return jsonify({'error': 'User not found!'}), 403
 
-    @app.route('/auth/delete', methods=['POST'])
+    @app.route('/auth/delete/', methods=['POST'])
     def delete_user():
         email = str(request.data.get('email'))
         found_user = User.query.filter_by(email=email).first()
@@ -143,7 +143,7 @@ def create_app(config_name):
             return jsonify({'message': 'User {} deleted'.format(email)}), 200
 
     # CRUD BU
-    @app.route('/bucketlist', methods=['POST', 'GET'])
+    @app.route('/bucketlist/', methods=['POST', 'GET'])
     @token_required
     def create_bucketlist(current_user):
 
@@ -171,7 +171,7 @@ def create_app(config_name):
             return jsonify({'error': 'Blank title. Please write your title'}), 401
         else:
             # GETs all bucketlists
-            url_endpoint = '/bucketlist'
+            url_endpoint = '/bucketlist/'
             search = request.args.get('q')
             page = int(request.args.get('page', default=1))
             # The page content limit should be 10
@@ -217,7 +217,7 @@ def create_app(config_name):
             bucket_dict['prev_page'] = prev_page
             return jsonify(bucket_dict), 200
 
-    @app.route('/bucketlist/<id>', methods=['GET'])
+    @app.route('/bucketlist/<id>/', methods=['GET'])
     @token_required
     def get_bucket(current_user, id):
         """Retrieves a buckelist using it's ID"""
@@ -234,7 +234,7 @@ def create_app(config_name):
             }
             return jsonify(resp), 200
 
-    @app.route('/bucketlist/<id>', methods=['DELETE'])
+    @app.route('/bucketlist/<id>/', methods=['DELETE'])
     @token_required
     def delete_bucket(current_user, id):
         """Deleting a specific bucketlist"""
@@ -248,7 +248,7 @@ def create_app(config_name):
             bucketlist.delete()
             return jsonify({'message': 'Bucketlist {} deleted'.format(title)}), 200
 
-    @app.route('/bucketlist/<id>', methods=['PUT'])
+    @app.route('/bucketlist/<id>/', methods=['PUT'])
     @token_required
     def edit_bucket(current_user, id):
         """Edits a bucketlist"""
@@ -269,7 +269,7 @@ def create_app(config_name):
             return jsonify(resp), 200
 
     # CRUD BUCKET LIST ITEMS
-    @app.route('/bucketlist/<id>/item', methods=['POST'])
+    @app.route('/bucketlist/<id>/item/', methods=['POST'])
     @token_required
     def create_item(current_user, id):
         """Method creates an item"""
@@ -312,7 +312,7 @@ def create_app(config_name):
         #     resp.status_code = 200
         #     return resp
 
-    @app.route('/bucketlist/<id>/item/<item_id>', methods=['DELETE'])
+    @app.route('/bucketlist/<id>/item/<item_id>/', methods=['DELETE'])
     @token_required
     def delete_bucketlist_item(current_user, id, item_id):
         """"Deltes a bucketlist"""
@@ -323,7 +323,7 @@ def create_app(config_name):
             item.delete()
             return jsonify({'message': 'Bucketlist item deleted'})
 
-    @app.route('/bucketlist/<id>/item/<item_id>', methods=['PUT'])
+    @app.route('/bucketlist/<id>/item/<item_id>/', methods=['PUT'])
     @token_required
     def edit_bucketlist_item(current_user, id, item_id):
         """Edits a bucketlist"""
