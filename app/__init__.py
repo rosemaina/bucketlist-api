@@ -17,6 +17,7 @@ db = SQLAlchemy()
 def create_app(config_name):
     """ Wraps the creation of a new Flask object and returns it"""
     app = FlaskAPI(__name__, instance_relative_config=True)
+    app.url_map.strict_slashes = False
     # loads up config settings
     app.config.from_object(app_config[config_name])
     app.config.from_pyfile('config.py')
