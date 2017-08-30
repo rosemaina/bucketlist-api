@@ -2,6 +2,7 @@
 # Importing objects from flask
 import os
 import jwt
+import datetime
 
 from flask import request, jsonify, render_template
 from flask_api import FlaskAPI
@@ -53,6 +54,8 @@ def create_app(config_name):
                 # Trying to decode the token found using the secret key
                 id = jwt.decode(token, os.getenv('SECRET'))['id']
                 current_user = User.query.filter_by(id=id).first()
+                if not current_user:
+                    return jsonify({'message': 'user not found!'}), 404
             except:
                 return jsonify({'message': 'Expired token! Please login'}), 401
 
@@ -114,9 +117,14 @@ def create_app(config_name):
         return resp
 
     @app.route('/auth/logout/', methods=['POST'])
-    def logout():
+    @token_required
+    def logout(current_user):
         """Method logs out user"""
-        pass
+        token = jwt.encode({
+            'id': current_user.id,
+            'exp': datetime.datetime.utcnow()
+        }, os.getenv('SECRET'))
+        return jsonify({'token': token.decode('UTF-8')})
 
     @app.route('/auth/reset_password/', methods=['POST'])
     def reset_password():
@@ -128,7 +136,7 @@ def create_app(config_name):
             found_user.create_password(new_password)
             found_user.save()
             return jsonify({'message': 'Password has changed successfully'}), 200
-        return jsonify({'error': 'User not found!'}), 403
+        return jsonify({'error': 'User not found!'}), 404
 
     @app.route('/auth/delete/', methods=['DELETE'])
     @token_required
@@ -136,12 +144,13 @@ def create_app(config_name):
         password = str(request.data.get('password'))
         found_user = User.query.filter_by(id=current_user.id).first()
         if not found_user:
-            return jsonify({'error': 'User not found'}), 405
+            return jsonify({'error': 'User not found'}), 404
         else:
             if password:
-                found_user.validate_password(password)
-                found_user.delete()
-                return jsonify({'message': 'User is deleted'}), 200
+                if found_user.validate_password(password):
+                    found_user.delete()
+                    return jsonify({'message': 'User is deleted'}), 200
+                return jsonify({'error': 'Please input correct password'}), 405
             return jsonify({'error': 'Please input your password'}), 405
 
     # CRUD BU
@@ -244,7 +253,7 @@ def create_app(config_name):
         bucketlist = Bucketlist.query.filter_by(
             user_id=current_user.id, id=id).first()
         if not bucketlist:
-            return jsonify({'error': 'Bucketlist Not found'}), 403
+            return jsonify({'error': 'Bucketlist Not found'}), 404
         else:
             title = bucketlist.title
             bucketlist.delete()
@@ -297,22 +306,7 @@ def create_app(config_name):
                     return jsonify({'error': 'Name already exists'}), 403
                 return jsonify({'error': 'Item name not given!'}), 401
         return jsonify({'error':'Bucketlist does not exist!'}), 403
-        # else:
-        #     # GETs all items in a list
-        #     items = Item.query.filter_by(bucket_id=id).all()
-        #     if not items:
-        #         return jsonify({'error': 'No bucket items found!'}), 403
 
-        #     results = []
-        #     for item in items:
-        #         obj = {
-        #             'id': item.id,
-        #             'name': item.name
-        #         }
-        #         results.append(obj)
-        #     resp = jsonify(results)
-        #     resp.status_code = 200
-        #     return resp
 
     @app.route('/bucketlist/<id>/item/<item_id>/', methods=['DELETE'])
     @token_required
