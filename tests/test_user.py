@@ -20,46 +20,51 @@ class UserTestCase(unittest.TestCase):
 
     def registration(self):
         """Test API can register a user"""
-        resp = self.client().post('/auth/register', data=self.user)
+        resp = self.client().post('/auth/register/', data=self.user)
 
+    def login(self):
+        """Logins a user"""
+        self.registration()
+        resp = self.client().post('/auth/login/', data=self.user)
+        return {'Authorization': json.loads(resp.data.decode())['token']}
 
     def test_user_registration(self):
         """Test API can create a user"""
-        resp = self.client().post('/auth/register', data=self.user)
+        resp = self.client().post('/auth/register/', data=self.user)
         self.assertEqual(resp.status_code, 201)
         self.assertIn('Successful registration!', str(resp.data))
 
     def test_user_existence(self):
         """Test API can't register a user twice"""
         user_data = {'email': 'johndoe.email@com', 'password': '12345678'}
-        resp = self.client().post('/auth/register', data=user_data)
+        resp = self.client().post('/auth/register/', data=user_data)
         self.assertEqual(resp.status_code, 403)
 
     def test_email_validation(self):
         """Test correct email format"""
         user_data = {'email': 'johndoe,email@com', 'password': '12345678'}
-        resp = self.client().post('/auth/register', data=user_data)
+        resp = self.client().post('/auth/register/', data=user_data)
         self.assertEqual(resp.status_code, 403)
         self.assertIn('Invalid email address!', str(resp.data))
 
     def test_password_length(self):
         """ Test confirms if password it the same'"""
         user_data = {'email': 'johndoe@email.com', 'password': '12345'}
-        resp = self.client().post('/auth/register', data=user_data)
+        resp = self.client().post('/auth/register/', data=user_data)
         self.assertEqual(resp.status_code, 411)
         self.assertIn('Password length is too short!', str(resp.data))
 
     def test_registration_data(self):
         """Test confirms that slots required have been filled"""
         user_data = {'email': '', 'password': ''}
-        resp = self.client().post('/auth/register', data=user_data)
+        resp = self.client().post('/auth/register/', data=user_data)
         self.assertEqual(resp.status_code, 400)
         self.assertIn('Email and password required!', str(resp.data))
 
     def test_login(self):
         """Test API can login a user"""
         self.registration()
-        resp = self.client().post('/auth/login', data=self.user)
+        resp = self.client().post('/auth/login/', data=self.user)
         self.assertEqual(resp.status_code, 200)
         self.assertIn('token', str(resp.data))
 
@@ -67,7 +72,7 @@ class UserTestCase(unittest.TestCase):
         """Test for wrong password"""
         self.registration()
         self.user['password'] = 'wrongPass'
-        resp = self.client().post('/auth/login', data=self.user)
+        resp = self.client().post('/auth/login/', data=self.user)
         self.assertEqual(resp.status_code, 401)
         self.assertIn('Wrong password!', str(resp.data))
 
@@ -75,7 +80,7 @@ class UserTestCase(unittest.TestCase):
         """Test for wrong password"""
         self.registration()
         self.user = {'email': '', 'password': '' }
-        resp = self.client().post('/auth/login', data=self.user)
+        resp = self.client().post('/auth/login/', data=self.user)
         self.assertEqual(resp.status_code, 401)
         self.assertIn('User not found', str(resp.data))
 
@@ -87,13 +92,23 @@ class UserTestCase(unittest.TestCase):
         """Test API can reset password for a user"""
         self.registration()
         self.user['password'] = 'test2'
-        resp = self.client().post('/auth/reset_password', data=self.user)
+        resp = self.client().post('/auth/reset_password/', data=self.user)
         self.assertEqual(resp.status_code, 200)
         self.assertIn('Password has changed successfully', str(resp.data))
 
         resp = self.client().post('/auth/login', data=self.user)
         self.assertEqual(resp.status_code, 200)
         self.assertIn('token', str(resp.data))
+
+    def test_delete_user(self):
+        """ Test API can delete a user"""
+        self.client().post('/auth/delete/', headers=self.login(), data=self.user)
+        resp = self.client().delete('/auth/delete/', headers=self.login(), data=self.user)
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn('User is deleted', str(resp.data))
+        result = self.client().get('/auth/delete/', headers=self.login())
+        self.assertEqual(result.status_code, 404)
+        self.assertIn('User not found', str(result.data))
 
     def tearDown(self):
         """teardown all initialized variables."""
