@@ -103,4 +103,5 @@ migrations/
 .vscode/
 
 .coveralls.yml
+.DS_Store
 
