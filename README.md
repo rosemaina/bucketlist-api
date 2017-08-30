@@ -6,7 +6,7 @@ What's on your bucket list? Adventure travel, volunteerism, crazy fun, connectin
 This is a Python-Flask based RESTful API application that allows users to log and catalog all the stuff they want to accomplish before they expire
 
 ### API Documentation
-. Link : 
+. Link : https://app.swaggerhub.com/apis/rosemaina/bucketlist-api101/1.0.0
 
 ## API-ENDPOINTS
 URL Endpoint    |               HTTP Request   | Resource Accessed | Access Type|
@@ -36,14 +36,18 @@ autoenv
 
 #### Installation  
 
-Download the project locally by running : git clone https://github.com/rosemaina/bucketlist-api.git  
-. directory `cd bucketlist-api` 
+Download the project locally by running : git clone https://github.com/rosemaina/bucketlist-api.git   
+. Prepare directory for project code:  
 
-. create a virtualenv file `virtualenv -p python3 bucketenv`
+  `$ mkdir -p ~/bucketlist-api`  
+  `$ cd ~/bucketlist-api` 
 
-. create a .env file and add the following exports:
+. Create a virtualenv file 
 
-. `source bucketenv/bin/activate`
+   `$ virtualenv -p python3 bucketenv`  
+   `$ source bucketenv/bin/activate`   
+
+. Create a .env file and add the following exports:
 
 . `export APP_SETTINGS=development`
 
@@ -53,20 +57,22 @@ Download the project locally by running : git clone https://github.com/rosemaina
 
 . activate environment variables `source .env`
 
+. Install the requirements in the requirements.txt file. Run `pip install -r requirements.txt`
+
 . Create a database  `createdb flask_api;`
 
 . To do migrations;  
+
 . `python manage.py db init`  
-. `python manage.py db migrate`  
-. `python manage.py db upgrade`  
+  `python manage.py db migrate`  
+  `python manage.py db upgrade`  
 
-. Install the requirements in the requirements.txt file. Run `pip install -r requirements.txt`
-
-. Run the application. `python manage.py runserver`
+. Run the application. `python manage.py runserver`  
+. The server should be running on server : http://127.0.0.1:5000/  
 
 #### Testing  
 
-To run tests against the project run: `coverage run --omit="*/site-packages/*" manage.py test`
+To run tests against the project run: `nosetests  --with-coverage --cover-package=app`
 
 ### Deployment
 
