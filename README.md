@@ -39,13 +39,13 @@ autoenv
 Download the project locally by running : git clone https://github.com/rosemaina/bucketlist-api.git   
 . Prepare directory for project code:  
 
-  ```$ mkdir -p ~/bucketlist-api  
-     $ cd ~/bucketlist-api```  
+  `$ mkdir -p ~/bucketlist-api`  
+  `$ cd ~/bucketlist-api` 
 
 . Create a virtualenv file 
 
-    ```$ virtualenv -p python3 bucketenv  
-       $ source bucketenv/bin/activate```  
+   `$ virtualenv -p python3 bucketenv`  
+   `$ source bucketenv/bin/activate`   
 
 . Create a .env file and add the following exports:
 
@@ -63,9 +63,9 @@ Download the project locally by running : git clone https://github.com/rosemaina
 
 . To do migrations;  
 
-. ```python manage.py db init  
-     python manage.py db migrate  
-     python manage.py db upgrade```   
+. `python manage.py db init`  
+  `python manage.py db migrate`  
+  `python manage.py db upgrade`  
 
 . Run the application. `python manage.py runserver`  
 . The server should be running on server : http://127.0.0.1:5000/  
