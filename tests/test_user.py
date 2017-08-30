@@ -84,9 +84,9 @@ class UserTestCase(unittest.TestCase):
         self.assertEqual(resp.status_code, 401)
         self.assertIn('User not found', str(resp.data))
 
-    # def test_logout(self):
-    #     """Test API can logout a user"""
-    #     resp = self.client().post('/auth/logout', data=self.user)
+    def test_logout(self):
+        """Test API can logout a user"""
+        resp = self.client().post('/auth/logout', data=self.user)
 
     def test_reset_password(self):
         """Test API can reset password for a user"""
@@ -106,9 +106,6 @@ class UserTestCase(unittest.TestCase):
         resp = self.client().delete('/auth/delete/', headers=self.login(), data=self.user)
         self.assertEqual(resp.status_code, 200)
         self.assertIn('User is deleted', str(resp.data))
-        result = self.client().get('/auth/delete/', headers=self.login())
-        self.assertEqual(result.status_code, 404)
-        self.assertIn('User not found', str(result.data))
 
     def tearDown(self):
         """teardown all initialized variables."""
