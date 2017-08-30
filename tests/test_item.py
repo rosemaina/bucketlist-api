@@ -77,6 +77,7 @@ class ItemTestCase(unittest.TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertIn('Bucketlist item deleted', str(resp.data))
 
+
     def tearDown(self):
         """teardown all initialized variables."""
         with self.app.app_context():
