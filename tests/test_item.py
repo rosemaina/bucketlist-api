@@ -20,7 +20,6 @@ class ItemTestCase(unittest.TestCase):
             # create all tables
             db.create_all()
 
-
     def registration(self):
         """Registers a user"""
         return self.client().post('/auth/register', data=self.user)
@@ -33,35 +32,45 @@ class ItemTestCase(unittest.TestCase):
 
     def test_create_bucketlist(self):
         """Creates a bucketlist"""
-        resp = self.client().post('/bucketlist', headers=self.login(), data=self.bucketlist)
+        resp = self.client().post(
+            '/bucketlist', headers=self.login(), data=self.bucketlist)
 
     def test_create_item(self):
         """Test API can create a bucketlist item"""
-        self.client().post('/bucketlist', headers=self.login(), data=self.bucketlist)
-        resp = self.client().post('/bucketlist/1/item', headers=self.login(), data=self.item)
+        self.client().post(
+            '/bucketlist', headers=self.login(), data=self.bucketlist)
+        resp = self.client().post(
+            '/bucketlist/1/item', headers=self.login(), data=self.item)
         self.assertEqual(resp.status_code, 201)
         self.assertIn('Go to disney', str(resp.data))
 
     def test_confirm_item_creation(self):
         """Test user cannot have same buckelist items names"""
-        self.client().post('/bucketlist', headers=self.login(), data=self.bucketlist)
-        self.client().post('/bucketlist/1/item', headers=self.login(), data=self.item)
-        resp = self.client().post('/bucketlist/1/item', headers=self.login(), data=self.item)
+        self.client().post(
+            '/bucketlist', headers=self.login(), data=self.bucketlist)
+        self.client().post(
+            '/bucketlist/1/item', headers=self.login(), data=self.item)
+        resp = self.client().post(
+            '/bucketlist/1/item', headers=self.login(), data=self.item)
         self.assertEqual(resp.status_code, 403)
         self.assertIn('Name already exists', str(resp.data))
 
     def test_blank_item_name(self):
         """Test that name is blank"""
-        self.client().post('/bucketlist', headers=self.login(), data=self.bucketlist)
+        self.client().post(
+            '/bucketlist', headers=self.login(), data=self.bucketlist)
         self.item['name'] = ''
-        resp = self.client().post('/bucketlist/1/item', headers=self.login(), data=self.item)
+        resp = self.client().post(
+            '/bucketlist/1/item', headers=self.login(), data=self.item)
         self.assertEqual(resp.status_code, 401)
         self.assertIn('Item name not given!', str(resp.data))
 
     def test_editing_a_bucketlist_item(self):
         """Test API can edit an existing bucketlist item"""
-        self.client().post('/bucketlist', headers=self.login(), data=self.bucketlist)
-        self.client().post('/bucketlist/1/item', headers=self.login(), data=self.item)
+        self.client().post(
+            '/bucketlist', headers=self.login(), data=self.bucketlist)
+        self.client().post(
+            '/bucketlist/1/item', headers=self.login(), data=self.item)
         self.item['name'] = 'new name'
         resp = self.client().put(
             '/bucketlist/1/item/1', headers=self.login(), data=self.item)
@@ -70,13 +79,14 @@ class ItemTestCase(unittest.TestCase):
 
     def test_delete_bucketlist_item(self):
         """Test API can delete a bucketlist item"""
-        self.client().post('/bucketlist', headers=self.login(), data=self.bucketlist)
-        self.client().post('/bucketlist/1/item', headers=self.login(), data=self.item)
+        self.client().post(
+            '/bucketlist', headers=self.login(), data=self.bucketlist)
+        self.client().post(
+            '/bucketlist/1/item', headers=self.login(), data=self.item)
         resp = self.client().delete(
             '/bucketlist/1/item/1', headers=self.login(), data=self.item)
         self.assertEqual(resp.status_code, 200)
         self.assertIn('Bucketlist item deleted', str(resp.data))
-
 
     def tearDown(self):
         """teardown all initialized variables."""

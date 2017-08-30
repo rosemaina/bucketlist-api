@@ -75,7 +75,7 @@ class User(db.Model):
 class Bucketlist(db.Model):
     """This class represents the bucketlist table."""
 
-    #Should always be plural
+    # Should always be plural
     __tablename__ = 'bucketlists'
 
     id = db.Column(db.Integer, primary_key=True)
@@ -92,12 +92,10 @@ class Bucketlist(db.Model):
         cascade="all,delete",
         )
 
-
     def __init__(self, title, user_id):
         """initialization."""
         self.title = title
         self.user_id = user_id
-
 
     def save(self):
         """Adds a new bucketlist to the database """
@@ -118,10 +116,11 @@ class Bucketlist(db.Model):
         """Represents the object instance of the model whenever it queries"""
         return "<Bucketlist: {}>".format(self.title)
 
+
 class Item(db.Model):
     """This class represents the bucketlist item table."""
 
-    #Should always be plural
+    # Should always be plural
     __tablename__ = 'items'
     __table_args__ = {'extend_existing': True}
     id = db.Column(db.Integer, primary_key=True)

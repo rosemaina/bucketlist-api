@@ -49,7 +49,8 @@ def create_app(config_name):
 
             if not token:
                 # Returns an error if token is missing
-                return jsonify({'error': 'Invalid token. Please register or login'}), 401
+                return jsonify(
+                    {'error': 'Invalid token. Please register or login'}), 401
             try:
                 # Trying to decode the token found using the secret key
                 id = jwt.decode(token, os.getenv('SECRET'))['id']
@@ -66,11 +67,7 @@ def create_app(config_name):
 
     @app.route('/auth/register/', methods=['POST'])
     def user_registration():
-<<<<<<< HEAD
-        """Register a new user"""
-=======
         """Method registers a user"""
->>>>>>> a609d97434e1e87f84d8a7c907b4c0e77a4dc5d8
         email = request.data['email']
         password = request.data['password']
         try:
@@ -100,7 +97,8 @@ def create_app(config_name):
                     return jsonify(
                         {'message': 'Password length is too short!'}), 411
             else:
-                return jsonify({'message': 'Email and password required!'}), 400
+                return jsonify(
+                    {'message': 'Email and password required!'}), 400
         except:
             return jsonify({'error': 'An error occured!'}), 500
 
@@ -139,7 +137,8 @@ def create_app(config_name):
         if found_user:
             found_user.create_password(new_password)
             found_user.save()
-            return jsonify({'message': 'Password has changed successfully'}), 200
+            return jsonify(
+                {'message': 'Password has changed successfully'}), 200
         return jsonify({'error': 'User not found!'}), 404
 
     @app.route('/auth/delete/', methods=['DELETE'])
@@ -183,7 +182,8 @@ def create_app(config_name):
                     resp.status_code = 201
                     return resp
                 return jsonify({'error': 'Title already taken!'}), 403
-            return jsonify({'error': 'Blank title. Please write your title'}), 401
+            return jsonify(
+                {'error': 'Blank title. Please write your title'}), 401
         else:
             # GETs all bucketlists
             url_endpoint = '/bucketlist/'
@@ -194,29 +194,31 @@ def create_app(config_name):
                 limit = int(request.args.get('limit', default=10))
             except ValueError:
                 return jsonify({'error': 'Error, pass a number'}), 406
-    
-            # Searches a bucketlist using q 
+
+            # Searches a bucketlist using q
             if search:
-                found_bucket = Bucketlist.query.filter_by(user_id=user_id).filter(
-                    Bucketlist.title.like('%'+search+'%')).paginate(page, limit, False)
+                found_bucket = Bucketlist.query.filter_by(
+                    user_id=user_id).filter(Bucketlist.title.like(
+                        '%'+search+'%')).paginate(page, limit, False)
             else:
-                found_bucket = Bucketlist.query.filter_by(user_id=user_id).paginate(
-                    page, limit, False)
+                found_bucket = Bucketlist.query.filter_by(
+                    user_id=user_id).paginate(page, limit, False)
             if not found_bucket.items:
                 return jsonify({'error': 'Bucketlists not found'}), 404
-
 
             bucket_dict = {"bucketlist": []}
             next_page = found_bucket.has_next if found_bucket.has_next else ''
             prev_page = found_bucket.has_prev if found_bucket.has_prev else ''
             # Base URl, concancate the pages,update page, give it a limit
             if next_page:
-                next_page = url_endpoint + '?page=' + str(page + 1) + '&limit=' + str(limit)
+                next_page = url_endpoint + '?page=' + str(
+                    page + 1) + '&limit=' + str(limit)
             else:
                 next_page = ''
 
             if prev_page:
-                prev_page = url_endpoint + '?page=' + str(page - 1) + '&limit=' + str(limit)
+                prev_page = url_endpoint + '?page=' + str(
+                    page - 1) + '&limit=' + str(limit)
             else:
                 prev_page = ''
 
@@ -261,7 +263,8 @@ def create_app(config_name):
         else:
             title = bucketlist.title
             bucketlist.delete()
-            return jsonify({'message': 'Bucketlist {} deleted'.format(title)}), 200
+            return jsonify(
+                {'message': 'Bucketlist {} deleted'.format(title)}), 200
 
     @app.route('/bucketlist/<id>/', methods=['PUT'])
     @token_required
@@ -309,8 +312,7 @@ def create_app(config_name):
                         return resp
                     return jsonify({'error': 'Name already exists'}), 403
                 return jsonify({'error': 'Item name not given!'}), 401
-        return jsonify({'error':'Bucketlist does not exist!'}), 403
-
+        return jsonify({'error': 'Bucketlist does not exist!'}), 403
 
     @app.route('/bucketlist/<id>/item/<item_id>/', methods=['DELETE'])
     @token_required
@@ -327,7 +329,8 @@ def create_app(config_name):
     @token_required
     def edit_bucketlist_item(current_user, id, item_id):
         """Edits a bucketlist"""
-        found_bucket = Bucketlist.query.filter_by(user_id=current_user.id, id=id).first()
+        found_bucket = Bucketlist.query.filter_by(
+            user_id=current_user.id, id=id).first()
         if found_bucket:
             name = str(request.data.get('name'))
             item = Item.query.filter_by(id=item_id, bucket_id=id).first()

@@ -79,7 +79,7 @@ class UserTestCase(unittest.TestCase):
     def test_login_with_missing_data(self):
         """Test for wrong password"""
         self.registration()
-        self.user = {'email': '', 'password': '' }
+        self.user = {'email': '', 'password': ''}
         resp = self.client().post('/auth/login/', data=self.user)
         self.assertEqual(resp.status_code, 401)
         self.assertIn('User not found', str(resp.data))
@@ -102,8 +102,10 @@ class UserTestCase(unittest.TestCase):
 
     def test_delete_user(self):
         """ Test API can delete a user"""
-        self.client().post('/auth/delete/', headers=self.login(), data=self.user)
-        resp = self.client().delete('/auth/delete/', headers=self.login(), data=self.user)
+        self.client().post(
+            '/auth/delete/', headers=self.login(), data=self.user)
+        resp = self.client().delete(
+            '/auth/delete/', headers=self.login(), data=self.user)
         self.assertEqual(resp.status_code, 200)
         self.assertIn('User is deleted', str(resp.data))
 
