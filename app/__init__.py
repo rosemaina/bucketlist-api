@@ -103,9 +103,7 @@ def create_app(config_name):
         password = request.data['password']
         found_user = User.query.filter_by(email=email).first()
         if not found_user:
-            resp = jsonify ({'error': 'User not found'})
-            resp.status_code = 401
-            return resp
+            return jsonify({'error': 'User not found'}), 401
 
         if not found_user.validate_password(password):
             resp = jsonify({'error': 'Wrong password!'})
@@ -132,16 +130,19 @@ def create_app(config_name):
             return jsonify({'message': 'Password has changed successfully'}), 200
         return jsonify({'error': 'User not found!'}), 403
 
-    @app.route('/auth/delete/', methods=['POST'])
-    def delete_user():
-        email = str(request.data.get('email'))
-        found_user = User.query.filter_by(email=email).first()
+    @app.route('/auth/delete/', methods=['DELETE'])
+    @token_required
+    def delete_user(current_user):
+        password = str(request.data.get('password'))
+        found_user = User.query.filter_by(id=current_user.id).first()
         if not found_user:
-            return jsonify({'error': 'User not found'}), 404
+            return jsonify({'error': 'User not found'}), 405
         else:
-            email = found_user.email
-            found_user.delete()
-            return jsonify({'message': 'User {} deleted'.format(email)}), 200
+            if password:
+                found_user.validate_password(password)
+                found_user.delete()
+                return jsonify({'message': 'User is deleted'}), 200
+            return jsonify({'error': 'Please input your password'}), 405
 
     # CRUD BU
     @app.route('/bucketlist/', methods=['POST', 'GET'])
