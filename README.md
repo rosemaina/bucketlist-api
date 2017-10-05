@@ -11,19 +11,19 @@ This is a Python-Flask based RESTful API application that allows users to log an
 ## API-ENDPOINTS
 URL Endpoint    |               HTTP Request   | Resource Accessed | Access Type|
 ----------------|-----------------|-------------|------------------
-/bucketlist/auth/register   |      POST    | Register a new user |public
-/bucketlist/auth/login      |     POST    | Login a registered user |public
-/bucketlist/auth/logout      |     POST    | Logout a user |public
-/bucketlist/auth/reset-password      |     PUT    | Reset password for a user |private
+/auth/register   |      POST    | Register a new user |public
+/auth/login      |     POST    | Login a registered user |public
+/auth/logout      |     POST    | Logout a user |public
+/auth/reset-password      |     PUT    | Reset password for a user |private
 /bucketlist                  |      POST    | Create a new Bucketlist |private
 /bucketlist                  |      GET    |     Retrieve all bucketlists for one user |private
 /bucketlist/<id>            |      GET        | Retrieve a specific bucketlist |private
 /bucketlist/<id>              |      PUT    |     Update a bucketlist |private
 /bucketlist/<id>              |      DELETE    | Delete a bucketlist |private
-/bucketlist/<id>/item/  |           GET    | Retrieve items for a specific bucketlist |private
-/bucketlist/<id>/item/     |     POST    | Create items in a bucketlist |private
-/bucketlist/<id>/item/<item_id>|    DELETE    | Delete an item in a bucketlist |prvate
-/bucketlist/<id>/item/<item_id>|    PUT       | Update a bucketlist item |private
+/bucketlist/<id>/item  |           GET    | Retrieve items for a specific bucketlist |private
+/bucketlist/<id>/item    |     POST    | Create items in a bucketlist |private
+/bucketlist/<id>/item/<item_id> |    DELETE    | Delete an item in a bucketlist |prvate
+/bucketlist/<id>/item/<item_id> |    PUT       | Update a bucketlist item |private
 
 
 #### Prerequisites:
