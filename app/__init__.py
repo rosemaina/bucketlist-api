@@ -8,6 +8,7 @@ from flask import request, jsonify, render_template
 from flask_api import FlaskAPI
 from flask_sqlalchemy import SQLAlchemy
 from functools import wraps
+from flask_cors import CORS
 # local import
 from instance.config import app_config
 
@@ -23,6 +24,7 @@ def create_app(config_name):
     app.config.from_object(app_config[config_name])
     app.config.from_pyfile('config.py')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    CORS(app)
     # Connects to the db
     db.init_app(app)
 
@@ -104,19 +106,23 @@ def create_app(config_name):
 
     @app.route('/auth/login/', methods=['POST'])
     def user_login():
-        email = request.data['email']
-        password = request.data['password']
-        found_user = User.query.filter_by(email=email).first()
-        if not found_user:
-            return jsonify({'error': 'User not found'}), 401
+        # TODO: Handle missing data
+        try:
+            email = request.data['email']
+            password = request.data['password']
+            found_user = User.query.filter_by(email=email).first()
+            if not found_user:
+                return jsonify({'error': 'Bucketlisty does not recognize that email'}), 404
 
-        if not found_user.validate_password(password):
-            resp = jsonify({'error': 'Wrong password!'})
-            resp.status_code = 401
+            if not found_user.validate_password(password):
+                resp = jsonify({'error': 'Wrong password!'})
+                resp.status_code = 401
+                return resp
+            resp = found_user.gen_token()
+            resp.status_code = 200
             return resp
-        resp = found_user.gen_token()
-        resp.status_code = 200
-        return resp
+        except:
+            return 'error', 406
 
     @app.route('/auth/logout/', methods=['POST'])
     @token_required
@@ -144,12 +150,15 @@ def create_app(config_name):
     @app.route('/auth/delete/', methods=['DELETE'])
     @token_required
     def delete_user(current_user):
+        print('pwd', request.data['password'])
         password = str(request.data.get('password'))
+        # print('this is pwd', password)
         found_user = User.query.filter_by(id=current_user.id).first()
         if not found_user:
             return jsonify({'error': 'User not found'}), 404
         else:
             if password:
+                print('this is pwd', password)
                 if found_user.validate_password(password):
                     found_user.delete()
                     return jsonify({'message': 'User is deleted'}), 200
@@ -160,7 +169,7 @@ def create_app(config_name):
     @app.route('/bucketlist/', methods=['POST', 'GET'])
     @token_required
     def create_bucketlist(current_user):
-
+        
         title = str(request.data.get('title'))
         user_id = current_user.id
         if request.method == "POST":
@@ -204,8 +213,8 @@ def create_app(config_name):
             else:
                 found_bucket = Bucketlist.query.filter_by(
                     user_id=user_id).paginate(page, limit, False)
-            if not found_bucket.items:
-                return jsonify({'error': 'Bucketlists not found'}), 404
+            # if not found_bucket.items:
+            #     return jsonify({'message': 'No buck'}), 404
 
             bucket_dict = {"bucketlist": []}
             next_page = found_bucket.has_next if found_bucket.has_next else ''
@@ -233,6 +242,7 @@ def create_app(config_name):
                 bucket_dict["bucketlist"].append(obj)
             bucket_dict['next_page'] = next_page
             bucket_dict['prev_page'] = prev_page
+            print(bucket_dict)
             return jsonify(bucket_dict), 200
 
     @app.route('/bucketlist/<id>/', methods=['GET'])
@@ -242,7 +252,7 @@ def create_app(config_name):
         bucketlist = Bucketlist.query.filter_by(
             user_id=current_user.id, id=id).first()
         if not bucketlist:
-            return jsonify({'error': 'Bucketlist Not found'}), 403
+            return jsonify({'error': 'Bucketlisty does not remember this bucketlist'}), 403
         else:
             resp = {
                 'id': bucketlist.id,
@@ -307,7 +317,7 @@ def create_app(config_name):
                         new_item.save()
                         resp = jsonify({
                             'id': new_item.id,
-                            'name': new_item.name,
+                            'name': new_item.name
                         })
                         resp.status_code = 201
                         return resp
@@ -343,7 +353,7 @@ def create_app(config_name):
             found_item = Item.query.filter_by(
                 bucket_id=id).paginate(page, limit, False)
         if not found_item.items:
-            return jsonify({'error': 'No items found'}), 404
+            return jsonify({'message': 'No bucketlist items created'}), 404
 
         item_dict = {"item": []}
         next_page = found_item.has_next if found_item.has_next else ''
@@ -364,7 +374,8 @@ def create_app(config_name):
         for item in found_item.items:
             obj = {
                 'id': item.id,
-                'name': item.name
+                'name': item.name,
+                'bucket_id': item.bucket_id
             }
             item_dict["item"].append(obj)
         item_dict['next_page'] = next_page
@@ -406,7 +417,7 @@ def create_app(config_name):
             name = str(request.data.get('name'))
             item = Item.query.filter_by(id=item_id, bucket_id=id).first()
             if not item:
-                return jsonify({'message': 'Bucketlist item Not found'}), 403
+                return jsonify({'error': 'Item is not found'}), 403
             else:
                 item.name = name
                 item.save()
@@ -415,6 +426,6 @@ def create_app(config_name):
                     'name': item.name
                 }
                 return jsonify(resp), 200
-        return jsonify({'error': 'User does not own that bucketlist!'})
+        return jsonify({'error': 'Bucketlisty does not recognize this bucketlist'})
 
     return app
