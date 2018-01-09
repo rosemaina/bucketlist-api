@@ -9,17 +9,19 @@ from flask_api import FlaskAPI
 from flask_sqlalchemy import SQLAlchemy
 from functools import wraps
 from flask_cors import CORS
+
 # local import
 from instance.config import app_config
-
 # initialize sql-alchemy
 db = SQLAlchemy()
 
+from app.models import User
 
 def create_app(config_name):
     """ Wraps the creation of a new Flask object and returns it"""
     app = FlaskAPI(__name__, instance_relative_config=True)
     app.url_map.strict_slashes = False
+    config_name = 'development'
     # loads up config settings
     app.config.from_object(app_config[config_name])
     app.config.from_pyfile('config.py')
@@ -102,7 +104,7 @@ def create_app(config_name):
                 return jsonify(
                     {'message': 'Email and password required!'}), 400
         except:
-            return jsonify({'error': 'An error occured!'}), 500
+            return jsonify({'error': 'An internal has error!'}), 500
 
     @app.route('/auth/login/', methods=['POST'])
     def user_login():
@@ -242,7 +244,6 @@ def create_app(config_name):
                 bucket_dict["bucketlist"].append(obj)
             bucket_dict['next_page'] = next_page
             bucket_dict['prev_page'] = prev_page
-            print(bucket_dict)
             return jsonify(bucket_dict), 200
 
     @app.route('/bucketlist/<id>/', methods=['GET'])
